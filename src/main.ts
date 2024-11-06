@@ -32,7 +32,7 @@ app.get("/", basicAuth, async (_req, res) => {
       },
       new Configuration({
         persistStorage: false,
-      })
+      }),
     );
 
     await crawler.run(startUrls);
@@ -46,4 +46,4 @@ app.get("/", basicAuth, async (_req, res) => {
   }
 });
 
-app.listen(5845);
+app.listen(8523);
