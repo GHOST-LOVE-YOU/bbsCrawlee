@@ -1,40 +1,40 @@
-# 使用 ubuntu:24.10 作为基础镜像
+# Use Ubuntu 24.10 as the base image for the builder stage
 FROM ubuntu:24.10 AS builder
 
-# 更新包管理器并安装基本依赖项
+# Update the package manager and install essential dependencies
 RUN apt-get update && apt-get install -y \
     curl \
     gnupg \
     ca-certificates \
     && rm -rf /var/lib/apt/lists/*
 
-# 安装 Node.js 20.x
+# Install Node.js 20.x
 RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
     && apt-get install -y nodejs
 
-# 安装 Playwright 浏览器依赖
+# Install Playwright browser dependencies
 RUN npx playwright install-deps
 
-# 设置工作目录
+# Set the working directory
 WORKDIR /app
 
-# 复制 package.json 和 package-lock.json 以利用 Docker 缓存层加速构建
+# Copy package.json and package-lock.json to leverage Docker caching
 COPY package*.json ./
 
-# 安装所有开发依赖项
+# Install all development dependencies
 RUN npm install --include=dev --audit=false
 
-# 安装 Playwright 浏览器
+# Install Playwright browsers
 RUN npx playwright install
 
-# 复制源代码并进行项目构建
+# Copy source code and build the project
 COPY . ./
 RUN npm run build --output-path=/app/dist
 
-# 使用更小的基础镜像创建最终镜像
+# Use a smaller base image to create the final production image
 FROM ubuntu:24.10
 
-# 安装 Node.js 运行时
+# Install Node.js runtime and required dependencies for Playwright
 RUN apt-get update && apt-get install -y \
     curl \
     gnupg \
@@ -68,18 +68,18 @@ RUN apt-get update && apt-get install -y \
     && apt-get install -y nodejs \
     && rm -rf /var/lib/apt/lists/*
 
-
-# 设置工作目录
+# Set the working directory
 WORKDIR /app
 
-# 从 builder 阶段复制构建好的文件
+# Copy built files from the builder stage
 COPY --from=builder /app/dist ./dist
 COPY --from=builder /app/package*.json ./
 
-# 安装生产依赖
+# Install production dependencies
 RUN npm install --omit=dev --omit=optional
 
+# Install Playwright browsers
 RUN npx playwright install
 
-# 启动应用
+# Command to start the application
 CMD ["node", "/app/dist/main.js"]
