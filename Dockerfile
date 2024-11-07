@@ -58,7 +58,7 @@ RUN apt-get update && apt-get install -y \
     libgbm1\
     libpango-1.0-0\
     libcairo2\
-    libasound2t64 
+    libasound2t64\
     && curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
     && apt-get install -y nodejs \
     && rm -rf /var/lib/apt/lists/*
