@@ -52,5 +52,7 @@ COPY --from=builder /app/package*.json ./
 # 安装生产依赖
 RUN npm install --omit=dev --omit=optional
 
+RUN npx playwright install
+
 # 启动应用
 CMD ["node", "/app/dist/main.js"]
