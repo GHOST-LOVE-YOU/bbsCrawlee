@@ -2,11 +2,15 @@ FROM apify/actor-node-playwright-chrome:20 AS builder
 
 USER root
 
+# Create the output directory
+RUN mkdir -p /dist
+
 # Copy just package.json and package-lock,json to speed up the build 
 COPY package*.json ./
 
 # Install all dependencies
 RUN npm install --include=dev --audit=false
+RUN npx playwright install
 
 # Cope the source files
 COPY . .
