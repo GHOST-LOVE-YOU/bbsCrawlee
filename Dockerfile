@@ -1,47 +1,56 @@
-FROM apify/actor-node-playwright-chrome:20 AS builder
+# 使用 ubuntu:24.10 作为基础镜像
+FROM ubuntu:24.10 AS builder
 
-USER root
+# 更新包管理器并安装基本依赖项
+RUN apt-get update && apt-get install -y \
+    curl \
+    gnupg \
+    ca-certificates \
+    && rm -rf /var/lib/apt/lists/*
 
-# Create the output directory
-RUN mkdir -p /dist
+# 安装 Node.js 20.x
+RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
+    && apt-get install -y nodejs
 
-# Copy just package.json and package-lock,json to speed up the build 
+# 安装 Playwright 浏览器依赖
+RUN npx playwright install-deps
+
+# 设置工作目录
+WORKDIR /app
+
+# 复制 package.json 和 package-lock.json 以利用 Docker 缓存层加速构建
 COPY package*.json ./
 
-# Install all dependencies
+# 安装所有开发依赖项
 RUN npm install --include=dev --audit=false
+
+# 安装 Playwright 浏览器
 RUN npx playwright install
 
-# Cope the source files
-COPY . .
-
-# build the project
-RUN npm run build --output-path=/dist
-
-# create the finial image
-FROM apify/actor-node-playwright-chrome:20
-
-# Switch to root user in the final image as well
-USER root
-
-#Cope only built js file from builder image
-COPY --from=builder /dist ./dist
-
-COPY package*.json ./
-
-# Install npm packages, skip skip optional and development dependencies
-# to keep the image small.
-RUN npm --quiet set progress=false \
-    && npm install --omit=dev --omit=optional \
-    && echo "Installed NPM packages:" \
-    && (npm list --omit=dev --all || true) \
-    && echo "Node.js version:" \
-    && node --version \
-    && echo "NPM version:" \
-    && npm --version
-
+# 复制源代码并进行项目构建
 COPY . ./
+RUN npm run build --output-path=/app/dist
 
-RUN chmod +x ./start_xvfb_and_run_cmd.sh
+# 使用更小的基础镜像创建最终镜像
+FROM ubuntu:24.10
 
-CMD ["sh", "-c", "./start_xvfb_and_run_cmd.sh && npm run start:prod --silent"]
+# 安装 Node.js 运行时
+RUN apt-get update && apt-get install -y \
+    curl \
+    gnupg \
+    && curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
+    && apt-get install -y nodejs \
+    && rm -rf /var/lib/apt/lists/*
+
+# 设置工作目录
+WORKDIR /app
+
+# 从 builder 阶段复制构建好的文件
+COPY --from=builder /app/dist ./dist
+COPY --from=builder /app/package*.json ./
+
+# 安装生产依赖
+RUN npm install --omit=dev --omit=optional
+
+# 启动应用
+CMD ["node", "/app/dist/main.js"]
