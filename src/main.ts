@@ -18,29 +18,29 @@ app.get("/", basicAuth, async (_req, res) => {
   isCrawling = true; // 设置标志位
 
   try {
-    const crawler = new PlaywrightCrawler({
-      requestHandler: async ({ page }) => {
-        // Wait for the actor cards to render.
-        await page.waitForSelector(".collection-block-item");
-        // Execute a function in the browser which targets
-        // the actor card elements and allows their manipulation.
-        const categoryTexts = await page.$$eval(
-          ".collection-block-item",
-          (els) => {
-            // Extract text content from the actor cards
-            return els.map((el) => el.textContent);
-          },
-        );
-        categoryTexts.forEach((text, i) => {
-          console.log(`CATEGORY_${i + 1}: ${text}\n`);
-        });
-      },
-    });
+    const startUrls = ["https://bbs.byr.cn/#!board/IWhisper"];
 
-    await crawler.run([
-      "https://warehouse-theme-metal.myshopify.com/collections",
-    ]);
-    return res.json({ message: "Welcome to express-app!" });
+    const crawler = new PlaywrightCrawler(
+      {
+        requestHandler: router,
+        maxRequestsPerCrawl: 50,
+        preNavigationHooks: [
+          async (crawlingContext) => {
+            await loadCookies(crawlingContext);
+          },
+        ],
+      },
+      new Configuration({
+        persistStorage: false,
+      }),
+    );
+
+    await crawler.run(startUrls);
+
+    // Retrieve the stored data
+    const allPostDatas = await crawler.getData();
+
+    return res.json(allPostDatas);
   } finally {
     isCrawling = false; // 无论成功还是失败,都重置标志位
   }
