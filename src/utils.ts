@@ -65,19 +65,19 @@ export const handleAuth = async (page: Page, log: Log, session: Session) => {
     await fs.writeFile(
       path.join(__dirname, "cookie.json"),
       JSON.stringify(cookies, null, 2),
-      "utf8"
+      "utf8",
     );
     log.info("Cookies saved to cookie.json");
   }
 };
 
 export const loadCookies = async (
-  crawlingContext: PlaywrightCrawlingContext
+  crawlingContext: PlaywrightCrawlingContext,
 ) => {
   try {
     const cookiesData = await fs.readFile(
       path.join(__dirname, "cookie.json"),
-      "utf-8"
+      "utf-8",
     );
     const cookies = JSON.parse(cookiesData);
     const typedCookies = cookies.map((cookie: any) => ({
@@ -88,7 +88,7 @@ export const loadCookies = async (
   } catch (error: any) {
     if (error.code === "ENOENT") {
       console.warn(
-        "Warning: ./cookie.json file not found. Proceeding without adding cookies."
+        "Warning: ./cookie.json file not found. Proceeding without adding cookies.",
       );
     } else {
       console.error("Error reading or parsing cookie file:", error);
@@ -109,7 +109,7 @@ export const addPostsToQueue = async (page: Page, enqueueLinks: any) => {
           .querySelector('td.title_9 a[href^="/article/IWhisper/"]')
           ?.getAttribute("href") || "";
       return { replyTimeText, url };
-    })
+    }),
   );
 
   let overpage = false;
@@ -117,7 +117,7 @@ export const addPostsToQueue = async (page: Page, enqueueLinks: any) => {
   for (const post of posts) {
     if (post.url && post.replyTimeText) {
       const replyTime = new Date(
-        `${currentDateTime.toDateString()} ${post.replyTimeText}`
+        `${currentDateTime.toDateString()} ${post.replyTimeText}`,
       );
       const timeDifferenceMs = currentDateTime.getTime() - replyTime.getTime();
       const timeDifferenceMinutes = timeDifferenceMs / 60000;
@@ -126,7 +126,7 @@ export const addPostsToQueue = async (page: Page, enqueueLinks: any) => {
         continue;
       }
 
-      if (timeDifferenceMinutes <= 8) {
+      if (timeDifferenceMinutes <= 10) {
         const absoluteUrl = new URL(post.url, "https://bbs.byr.cn").toString();
         await enqueueLinks({
           urls: [absoluteUrl],
@@ -183,7 +183,7 @@ export const getPostDetails = async (page: Page) => {
 export const getComments = async (page: Page) => {
   const comments: crawlComment[] = [];
   const commentElements = await page.$$(
-    "div.b-content.corner div.a-wrap.corner table.article tbody"
+    "div.b-content.corner div.a-wrap.corner table.article tbody",
   );
 
   for (const wrap of commentElements) {
@@ -209,17 +209,17 @@ export const getComments = async (page: Page) => {
     let likesElement, dislikesElement;
     if (floor === "楼主") {
       likesElement = await wrap.$(
-        "tr.a-bottom td ul.a-status li a.a-func-support"
+        "tr.a-bottom td ul.a-status li a.a-func-support",
       );
       dislikesElement = await wrap.$(
-        "tr.a-bottom td ul.a-status li a.a-func-oppose"
+        "tr.a-bottom td ul.a-status li a.a-func-oppose",
       );
     } else {
       likesElement = await wrap.$(
-        "tr.a-bottom td ul.a-status li a.a-func-like"
+        "tr.a-bottom td ul.a-status li a.a-func-like",
       );
       dislikesElement = await wrap.$(
-        "tr.a-bottom td ul.a-status li a.a-func-cai"
+        "tr.a-bottom td ul.a-status li a.a-func-cai",
       );
     }
 
@@ -228,7 +228,7 @@ export const getComments = async (page: Page) => {
 
     const likes = parseInt(likesText.match(/\((?:\+)?(\d+)\)/)?.[1] || "0");
     const dislikes = parseInt(
-      dislikesText.match(/\((?:\+)?(\d+)\)/)?.[1] || "0"
+      dislikesText.match(/\((?:\+)?(\d+)\)/)?.[1] || "0",
     );
 
     const commentData = {
