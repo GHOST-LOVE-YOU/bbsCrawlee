@@ -23,7 +23,7 @@ app.get("/", basicAuth, async (_req, res) => {
     const crawler = new PlaywrightCrawler(
       {
         requestHandler: router,
-        maxRequestsPerCrawl: 50,
+        maxRequestsPerCrawl: 100,
         preNavigationHooks: [
           async (crawlingContext) => {
             await loadCookies(crawlingContext);

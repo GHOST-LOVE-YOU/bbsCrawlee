@@ -126,7 +126,7 @@ export const addPostsToQueue = async (page: Page, enqueueLinks: any) => {
         continue;
       }
 
-      if (timeDifferenceMinutes <= 10) {
+      if (timeDifferenceMinutes <= 65) {
         const absoluteUrl = new URL(post.url, "https://bbs.byr.cn").toString();
         await enqueueLinks({
           urls: [absoluteUrl],
