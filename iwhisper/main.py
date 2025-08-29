@@ -11,7 +11,7 @@ from crawlee.errors import SessionError
 from crawlee.sessions import SessionPool
 from typing_extensions import override
 
-from iwhisper.utils import create_session_fn
+from iwhisper.lib.auth import create_session_fn
 
 from .routes import router
 
@@ -28,7 +28,7 @@ class CamoufoxPlugin(PlaywrightBrowserPlugin):
         return PlaywrightBrowserController(
             browser=await AsyncNewBrowser(
                 self._playwright,
-                headless=False,
+                headless=True,
             ),
             max_open_pages_per_browser=10,
             header_generator=None,
@@ -38,7 +38,7 @@ class CamoufoxPlugin(PlaywrightBrowserPlugin):
 async def main() -> None:
     """爬虫入口"""
     crawler = PlaywrightCrawler(
-        max_requests_per_crawl=10,
+        max_requests_per_crawl=100,
         request_handler=router,
         browser_pool=BrowserPool(plugins=[CamoufoxPlugin()]),
         concurrency_settings=ConcurrencySettings(max_tasks_per_minute=50),

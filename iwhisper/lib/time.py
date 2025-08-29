@@ -3,7 +3,7 @@ from datetime import datetime
 import pytz
 
 
-def is_time_within_10_minutes(time_str: str) -> bool:
+def is_near_now(time_str: str) -> bool:
     """
     传入一个时间字符串（格式：HH:MM:SS），与当前时间比较（东八区）。
     如果时间间隔小于10分钟，返回True，否则返回False。
@@ -40,4 +40,4 @@ def is_time_within_10_minutes(time_str: str) -> bool:
     time_diff = now_timestamp - target_timestamp
 
     # 判断是否小于10分钟（600秒）
-    return time_diff < 600
+    return time_diff < 6000
