@@ -1,5 +1,5 @@
 from camoufox import AsyncNewBrowser
-from crawlee import ConcurrencySettings, Request
+from crawlee import ConcurrencySettings
 from crawlee._utils.context import ensure_context
 from crawlee.browsers import (
     BrowserPool,
@@ -60,6 +60,4 @@ async def main() -> None:
             context.log.info(f"会话 {context.session.id} 被阻塞")
             crawler.stop()
 
-    await crawler.run(
-        [Request.from_url("https://bbs.byr.cn/#!board/IWhisper", label="session_init")]
-    )
+    await crawler.run(["https://bbs.byr.cn/#!board/IWhisper"])

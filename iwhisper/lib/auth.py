@@ -79,3 +79,10 @@ async def login_with_form(context: PlaywrightCrawlingContext) -> None:
         if await is_unauthenticated(context):
             raise RuntimeError("登录失败")
 
+
+async def hander_auth(context: PlaywrightCrawlingContext) -> None:
+    if await is_unauthenticated(context):
+        context.log.info("检测到未登录态，尝试登录")
+        await login_with_form(context)
+        context.log.info("登录完成")
+
