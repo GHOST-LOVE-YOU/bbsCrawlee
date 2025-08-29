@@ -962,6 +962,7 @@ dependencies = [
     { name = "camoufox", extra = ["geoip"] },
     { name = "crawlee", extra = ["playwright"] },
     { name = "isort" },
+    { name = "python-dotenv" },
     { name = "ruff" },
 ]
 
@@ -971,6 +972,7 @@ requires-dist = [
     { name = "camoufox", extras = ["geoip"], specifier = "~=0.4.5" },
     { name = "crawlee", extras = ["playwright"] },
     { name = "isort", specifier = ">=6.0.1" },
+    { name = "python-dotenv", specifier = ">=1.0.0" },
     { name = "ruff", specifier = ">=0.12.11" },
 ]
 
