@@ -1,0 +1,31 @@
+{
+    // ==== 基础编辑器设置 ====
+    "editor.tabSize": 4,
+    "editor.insertSpaces": true,
+    "editor.detectIndentation": false,
+    "editor.rulers": [88], // black 默认 88 字符换行
+    "files.trimTrailingWhitespace": true,
+    "files.insertFinalNewline": true,
+    "editor.formatOnSave": true,
+
+    // ==== Python 格式化 ====
+    // 使用 MS Python 扩展调用 Black
+    "python.formatting.provider": "black",
+    "[python]": {
+      "editor.defaultFormatter": "ms-python.black-formatter"
+    },
+
+    // ==== Import 排序 ====
+    "isort.args": ["--profile", "black"],
+
+    // ==== Linting (Ruff 替代 flake8/pylint, 更快) ====
+    "python.linting.enabled": true,
+    "python.linting.ruffEnabled": true,
+    "python.linting.ruffArgs": ["--fix"],
+
+    // ==== 保存时自动执行 ====
+    "editor.codeActionsOnSave": {
+        "source.organizeImports": "explicit",
+        "source.fixAll": "explicit"
+    }
+  }
