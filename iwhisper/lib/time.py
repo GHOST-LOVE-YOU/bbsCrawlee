@@ -2,6 +2,8 @@ from datetime import datetime
 
 import pytz
 
+from iwhisper.lib.utils import get_env
+
 
 def is_near_now(time_str: str) -> bool:
     """
@@ -14,6 +16,10 @@ def is_near_now(time_str: str) -> bool:
     Returns:
         bool: 时间间隔小于10分钟返回True，否则返回False
     """
+    threshold = int(get_env("TIME_THRESHOLD", "600"))
+    if threshold == -1:
+        return True
+
     # 设置东八区时区
     tz = pytz.timezone("Asia/Shanghai")
 
@@ -39,5 +45,5 @@ def is_near_now(time_str: str) -> bool:
     # 计算时间差（秒）
     time_diff = now_timestamp - target_timestamp
 
-    # 判断是否小于10分钟（600秒）
-    return time_diff < 6000
+    # 判断是否小于时间阈值
+    return time_diff < threshold

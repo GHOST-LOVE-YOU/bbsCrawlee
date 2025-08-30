@@ -1,4 +1,5 @@
 # 将下一页链接加入队列
+import os
 from urllib.parse import urljoin
 
 from crawlee import Request
@@ -44,3 +45,13 @@ async def check_and_wait_page(
         context.log.warning(f"{selector} 未找到; 跳过提取")
         return False
     return True
+
+
+# 从.env读取环境变量
+def get_env(key: str, default: str | None = None) -> str:
+    value = os.getenv(key)
+    if not value:
+        if default is None:
+            raise RuntimeError(f"未设置环境变量: {key}")
+        value = default
+    return value

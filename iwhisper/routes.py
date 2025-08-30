@@ -1,3 +1,4 @@
+import json
 from crawlee.crawlers import PlaywrightCrawlingContext
 from crawlee.router import Router
 
@@ -21,7 +22,7 @@ async def basic_handler(context: PlaywrightCrawlingContext) -> None:
         return
 
     # 提取帖子链接并加入队列
-    if await addPostsToQueue(context) and False:
+    if await addPostsToQueue(context):
         # 翻页：通过 DOM 定位找到“下一页”链接并加入队列
         await enqueue_next_page(context)
 
@@ -33,6 +34,7 @@ async def detail_handler(context: PlaywrightCrawlingContext) -> None:
 
     # 从 DOM 中提取帖子内容
     content = await extract_post_content(context)
-    context.log.info(f"提取结果: {content}")
+    # context.log.info(f"提取结果: {json.dumps(content, ensure_ascii=False, indent=2)}")
+    await context.push_data(content)
 
     await enqueue_next_page(context, label="detail")

@@ -12,6 +12,7 @@ from crawlee.sessions import SessionPool
 from typing_extensions import override
 
 from iwhisper.lib.auth import create_session_fn
+from iwhisper.lib.utils import get_env
 
 from .routes import router
 
@@ -38,10 +39,10 @@ class CamoufoxPlugin(PlaywrightBrowserPlugin):
 async def main() -> None:
     """爬虫入口"""
     crawler = PlaywrightCrawler(
-        max_requests_per_crawl=100,
+        max_requests_per_crawl=int(get_env("MAX_REQUESTS_PER_CRAWL", "10")),
         request_handler=router,
         browser_pool=BrowserPool(plugins=[CamoufoxPlugin()]),
-        concurrency_settings=ConcurrencySettings(max_tasks_per_minute=50),
+        concurrency_settings=ConcurrencySettings(max_tasks_per_minute=60),
         max_session_rotations=0,
         session_pool=SessionPool(
             max_pool_size=1,
@@ -60,4 +61,4 @@ async def main() -> None:
             context.log.info(f"会话 {context.session.id} 被阻塞")
             crawler.stop()
 
-    await crawler.run(["https://bbs.byr.cn/#!board/IWhisper"])
+    await crawler.run(["https://bbs.byr.cn/#!board/Advice"])

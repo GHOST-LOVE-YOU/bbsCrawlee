@@ -4,6 +4,8 @@ from datetime import timedelta
 from crawlee.crawlers import PlaywrightCrawlingContext
 from crawlee.sessions import Session
 
+from iwhisper.lib.utils import get_env
+
 SESSION_ID = "Spark65"
 
 
@@ -53,10 +55,8 @@ async def is_unauthenticated(context: PlaywrightCrawlingContext) -> bool:
 
 async def login_with_form(context: PlaywrightCrawlingContext) -> None:
     """在未登录时使用侧边栏登录表单完成登录。"""
-    username = os.getenv("BBS_USERNAME")
-    password = os.getenv("BBS_PASSWORD")
-    if not username or not password:
-        raise RuntimeError("未设置 BBS_USERNAME 和 BBS_PASSWORD 环境变量")
+    username = get_env("BBS_USERNAME")
+    password = get_env("BBS_PASSWORD")
 
     page = context.page
     if page is None:

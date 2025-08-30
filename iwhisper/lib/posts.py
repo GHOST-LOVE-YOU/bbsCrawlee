@@ -55,7 +55,6 @@ async def addPostsToQueue(context: PlaywrightCrawlingContext) -> bool:
             absolute_url = f"https://bbs.byr.cn{href}"
             req = Request.from_url(absolute_url, label="detail")
             await context.add_requests([req])
-            return True
         else:
             context.log.info(f"post: href={href} latest={latest_text} is not near now")
             return False
@@ -131,7 +130,7 @@ async def extract_post_content(context: PlaywrightCrawlingContext) -> str:
         "comments": comments,
     }
 
-    return json.dumps(result, ensure_ascii=False)
+    return result
 
 
 async def extract_topic(wrap: Locator) -> str:
