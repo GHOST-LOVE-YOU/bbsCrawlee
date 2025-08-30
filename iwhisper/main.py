@@ -42,7 +42,7 @@ async def main() -> None:
         max_requests_per_crawl=int(get_env("MAX_REQUESTS_PER_CRAWL", "10")),
         request_handler=router,
         browser_pool=BrowserPool(plugins=[CamoufoxPlugin()]),
-        concurrency_settings=ConcurrencySettings(max_tasks_per_minute=60),
+        concurrency_settings=ConcurrencySettings(max_tasks_per_minute=30),
         max_session_rotations=0,
         session_pool=SessionPool(
             max_pool_size=1,

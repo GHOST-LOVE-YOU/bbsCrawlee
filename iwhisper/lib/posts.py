@@ -10,7 +10,7 @@ from iwhisper.lib.time import is_near_now
 
 # 正则工具
 author_re = re.compile(r"发信人:\s*([^\s(]+)")
-time_re = re.compile(r"发信站:\s.*\((.*?)\)")
+time_re = re.compile(r"发信站:\s.*\((.*?)\),")
 num_in_paren_re = re.compile(r"[\(（]\+?(\d+)[\)）]")
 like_re = re.compile(r"赞\((\d+)\)")
 cai_re = re.compile(r"踩\((\d+)\)")
@@ -51,7 +51,6 @@ async def addPostsToQueue(context: PlaywrightCrawlingContext) -> bool:
                     latest_text = (await second_cell.text_content() or "").strip()
 
         if is_near_now(latest_text):
-            context.log.info(f"post: href={href} latest={latest_text}")
             absolute_url = f"https://bbs.byr.cn{href}"
             req = Request.from_url(absolute_url, label="detail")
             await context.add_requests([req])

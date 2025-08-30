@@ -14,10 +14,6 @@ router = Router[PlaywrightCrawlingContext]()
 async def basic_handler(context: PlaywrightCrawlingContext) -> None:
     await hander_auth(context)
 
-    context.log.info(
-        f"basic_handler: {context.request.url}, label: {context.request.label}"
-    )
-
     if not await check_and_wait_page(context, ".board-list"):
         return
 
