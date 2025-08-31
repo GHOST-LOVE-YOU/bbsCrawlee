@@ -11,6 +11,7 @@ from crawlee.errors import SessionError
 from crawlee.sessions import SessionPool
 from typing_extensions import override
 
+from iwhisper.constants.board import board_list
 from iwhisper.lib.auth import create_session_fn
 from iwhisper.lib.utils import get_env
 
@@ -61,4 +62,5 @@ async def main() -> None:
             context.log.info(f"会话 {context.session.id} 被阻塞")
             crawler.stop()
 
-    await crawler.run(["https://bbs.byr.cn/#!board/Advice"])
+    for board in board_list:
+        await crawler.run(["https://bbs.byr.cn/#!board/" + board["label"]])

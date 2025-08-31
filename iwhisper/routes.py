@@ -1,4 +1,3 @@
-import json
 from crawlee.crawlers import PlaywrightCrawlingContext
 from crawlee.router import Router
 
