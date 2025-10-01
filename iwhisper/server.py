@@ -36,22 +36,30 @@ async def scrape_url(request: Request, url: str | None = None) -> dict:
     if not url:
         return {"url": "missing", "scrape result": "no results"}
 
-    # Generate random unique key for the request
+    print(url)
+
+    # 为每个请求创建一个唯一的标识符和一个 Future 对象
     unique_key = str(uuid4())
 
-    # Set the result future in the result dictionary so that it can be awaited
-    request.state.requests_to_results[unique_key] = asyncio.Future[dict[str, str]]()
+    # 将结果的 future 对象存入结果字典，以便后续等待
+    # request.state.requests_to_results[unique_key] = asyncio.Future[dict[str, str]]()
+    # 不需要Future, 定义一个数组可以在await context.push_data(content)后存储多个content就行
+    request.state.requests_to_results[unique_key] = []
 
-    # Add the request to the crawler queue
+    # 将请求加入爬虫队列
     await request.state.crawler.add_requests(
         [crawlee.Request.from_url(url, unique_key=unique_key)]
     )
 
-    # Wait for the result future to be finished
-    result = await request.state.requests_to_results[unique_key]
+    # 等待爬虫处理完成
+    while not await request.state.crawler._request_manager.is_finished():
+        await asyncio.sleep(0.5)  # 间隔一会再检查
+
+    # 获取结果
+    result = await request.state.crawler.get_data()
 
     # Clean the result from the result dictionary to free up memory
-    request.state.requests_to_results.pop(unique_key)
+    request.state.requests_to_results.pop(unique_key, None)
 
     # Return the result
-    return {"url": url, "scrape result": result}
+    return {"items": result.items}

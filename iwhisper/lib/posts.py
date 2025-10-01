@@ -61,13 +61,13 @@ async def addPostsToQueue(context: PlaywrightCrawlingContext) -> bool:
     return True
 
 
-async def extract_post_content(context: PlaywrightCrawlingContext) -> str:
+async def extract_post_content(context: PlaywrightCrawlingContext) -> dict:
     """
     从页面中提取帖子内容
     """
     page = context.page
     if page is None:
-        return ""
+        return {}
 
     # 从 URL 提取 area / byr_id / page
     url = context.request.url
