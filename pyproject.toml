@@ -15,5 +15,7 @@ dependencies = [
     "ruff>=0.12.11",
     "python-dotenv>=1.0.0",
     "pytz>=2025.2",
+    "fastapi[standard]>=0.118.0",
+    "parsel>=1.10.0",
 ]
 
