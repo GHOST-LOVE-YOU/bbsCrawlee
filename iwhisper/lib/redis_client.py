@@ -21,9 +21,29 @@ class RedisClient:
 
     async def update_last_page(self, post_id: str, page: int) -> None:
         """
-        更新某个 post_id 已爬取的最大页数
+        更新某个 post_id 已爬取的最大页数（只在更大时更新）
         """
-        await self._redis.set(f"post:{post_id}:last_page", page)
+        key = f"post:{post_id}:last_page"
+        pipe = self._redis.pipeline()
+        while True:
+            try:
+                # WATCH 乐观锁，防止并发写冲突
+                await pipe.watch(key)
+                current = await pipe.get(key)
+                if current is None:
+                    new_page = page
+                else:
+                    new_page = max(int(current), page)
+
+                pipe.multi()
+                pipe.set(key, new_page)
+                await pipe.execute()
+                break
+            except aioredis.WatchError:
+                # 如果有并发冲突，重试
+                continue
+            finally:
+                await pipe.reset()
 
     async def check_connection(self) -> bool:
         """

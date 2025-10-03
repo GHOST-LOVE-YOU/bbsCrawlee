@@ -5,8 +5,10 @@ from uuid import uuid4
 from crawlee import Request
 from crawlee.crawlers import PlaywrightCrawlingContext
 from playwright.sync_api import Locator
+from redis_client import redis_client
 
 from iwhisper.lib.time import is_near_now
+from iwhisper.lib.utils import page_dump
 
 # 正则工具
 author_re = re.compile(r"发信人:\s*([^\s(]+)")
@@ -51,7 +53,7 @@ async def addPostsToQueue(context: PlaywrightCrawlingContext) -> bool:
                     latest_text = (await second_cell.text_content() or "").strip()
 
         if is_near_now(latest_text):
-            absolute_url = f"https://bbs.byr.cn{href}"
+            absolute_url = page_dump(f"https://bbs.byr.cn{href}")
             req = Request.from_url(
                 absolute_url, label="detail", unique_key=f"{absolute_url}-{uuid4()}"
             )
@@ -119,6 +121,8 @@ async def extract_post_content(context: PlaywrightCrawlingContext) -> dict:
         if floor.startswith("楼主"):
             post_author = author
             post_time = time
+
+    await redis_client.update_last_page(byr_id, page_no)
 
     result = {
         "byr_id": byr_id,

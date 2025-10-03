@@ -1,10 +1,12 @@
 # 将下一页链接加入队列
 import os
+import re
 from urllib.parse import urljoin
 from uuid import uuid4
 
 from crawlee import Request
 from crawlee.crawlers import PlaywrightCrawlingContext
+from redis_client import redis_client
 
 
 async def enqueue_next_page(
@@ -58,3 +60,20 @@ def get_env(key: str, default: str | None = None) -> str:
             raise RuntimeError(f"未设置环境变量: {key}")
         value = default
     return value
+
+
+async def page_dump(absolute_url: str) -> str:
+    # 从URL提取post_id
+    match = re.search(r"/(\d+)$", absolute_url)
+    if not match:
+        raise ValueError(f"无法从URL提取post_id: {absolute_url}")
+    post_id = match.group(1)
+
+    # 从 Redis 获取起始页
+    start_page = await redis_client.get_start_page(post_id)
+
+    if start_page > 1:
+        url = f"{absolute_url}?p={start_page}"
+    else:
+        url = absolute_url
+    return url

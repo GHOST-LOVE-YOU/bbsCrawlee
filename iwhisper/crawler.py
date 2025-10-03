@@ -19,7 +19,7 @@ from fastapi import FastAPI
 from typing_extensions import override
 
 from iwhisper.lib.auth import create_session_fn
-from iwhisper.lib.redis import init_redis, redis_client
+from iwhisper.lib.redis_client import init_redis, redis_client
 from iwhisper.lib.utils import get_env
 
 from .routes import router
