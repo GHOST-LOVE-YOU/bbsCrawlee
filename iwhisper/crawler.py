@@ -14,7 +14,6 @@ from crawlee.browsers import (
 from crawlee.crawlers import PlaywrightCrawler, PlaywrightCrawlingContext
 from crawlee.errors import SessionError
 from crawlee.sessions import SessionPool
-from dotenv import load_dotenv
 from fastapi import FastAPI
 from typing_extensions import override
 
@@ -53,8 +52,6 @@ class CamoufoxPlugin(PlaywrightBrowserPlugin):
 
 @asynccontextmanager
 async def lifespan(app: FastAPI) -> AsyncIterator[State]:
-    # 加载虚拟环境
-    load_dotenv()
 
     # 初始化redis
     init_redis(url=get_env("REDIS_URL", "redis://localhost"))

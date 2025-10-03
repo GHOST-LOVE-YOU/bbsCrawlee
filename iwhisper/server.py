@@ -4,15 +4,33 @@ import asyncio
 from uuid import uuid4
 
 import crawlee
-from fastapi import FastAPI
+from dotenv import load_dotenv
+from fastapi import Depends, FastAPI
+from fastapi.responses import JSONResponse
+from fastapi.security import HTTPBasic, HTTPBasicCredentials
 from starlette.requests import Request
 from starlette.responses import HTMLResponse
 
+from iwhisper.lib.utils import get_env
+
 from .crawler import lifespan
 
+load_dotenv()
+
 app = FastAPI(lifespan=lifespan, title="Crawler app")
+security = HTTPBasic()
+
 is_crawling = False  # 全局运行标志
 lock = asyncio.Lock()  # 防止并发修改标志
+
+USERNAME = get_env("AUTH_USERNAME")
+PASSWORD = get_env("AUTH_PASSWORD")
+
+
+def check_credentials(credentials: HTTPBasicCredentials = Depends(security)):
+    if credentials.username != USERNAME or credentials.password != PASSWORD:
+        raise JSONResponse(status_code=401, content={"error": "Unauthorized"})
+    return credentials.username
 
 
 @app.get("/", response_class=HTMLResponse)
@@ -34,7 +52,9 @@ def index() -> str:
 
 
 @app.get("/scrape")
-async def scrape_url(request: Request, url: str | None = None) -> dict:
+async def scrape_url(
+    request: Request, url: str | None = None, user: str = Depends(check_credentials)
+) -> dict:
     # 防止并发运行
     global is_crawling
     async with lock:
@@ -60,4 +80,6 @@ async def scrape_url(request: Request, url: str | None = None) -> dict:
         return {"items": result.items}
     finally:
         async with lock:
+            is_crawling = False
+            is_crawling = False
             is_crawling = False
