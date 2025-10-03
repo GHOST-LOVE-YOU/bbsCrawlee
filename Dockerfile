@@ -40,4 +40,4 @@ RUN python -m compileall -q .
 RUN python -m camoufox fetch
 
 # 默认命令：用 uv 启动 FastAPI 开发服务器
-CMD ["uv", "run", "fastapi", "dev", "iwhisper/server.py"]
+CMD ["uv", "run", "fastapi", "dev", "iwhisper/server.py", "--host", "0.0.0.0", "--port", "8523"]
