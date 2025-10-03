@@ -19,7 +19,7 @@ class RedisClient:
             return 1
         return int(last_page)
 
-    async def update_last_page(self, post_id: str, page: int) -> None:
+    async def update_last_page(self, post_id: str, page: str) -> None:
         """
         更新某个 post_id 已爬取的最大页数（只在更大时更新）
         """
@@ -33,7 +33,7 @@ class RedisClient:
                 if current is None:
                     new_page = page
                 else:
-                    new_page = max(int(current), page)
+                    new_page = max(int(current), int(page))
 
                 pipe.multi()
                 pipe.set(key, new_page)
