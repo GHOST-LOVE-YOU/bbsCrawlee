@@ -53,7 +53,7 @@ async def addPostsToQueue(context: PlaywrightCrawlingContext) -> bool:
                     latest_text = (await second_cell.text_content() or "").strip()
 
         if is_near_now(latest_text):
-            absolute_url = page_dump(f"https://bbs.byr.cn{href}")
+            absolute_url = await page_dump(f"https://bbs.byr.cn{href}")
             req = Request.from_url(
                 absolute_url, label="detail", unique_key=f"{absolute_url}-{uuid4()}"
             )
