@@ -2,7 +2,6 @@ import asyncio
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
 from typing import Any, TypedDict
-from uuid import uuid4
 
 from camoufox import AsyncNewBrowser
 from crawlee import ConcurrencySettings
@@ -20,7 +19,7 @@ from fastapi import FastAPI
 from typing_extensions import override
 
 from iwhisper.lib.auth import create_session_fn
-from iwhisper.lib.redis import RedisClient
+from iwhisper.lib.redis import init_redis, redis_client
 from iwhisper.lib.utils import get_env
 
 from .routes import router
@@ -58,14 +57,9 @@ async def lifespan(app: FastAPI) -> AsyncIterator[State]:
     load_dotenv()
 
     # 初始化redis
-    global redis_client
-    redis_client = RedisClient(url=get_env("REDIS_URL", "redis://localhost"))
+    init_redis(url=get_env("REDIS_URL", "redis://localhost"))
     if not await redis_client.check_connection():
         raise ConnectionError("无法连接到 Redis，请检查 REDIS_URL 配置。")
-
-    # 请求的唯一标识符映射到其结果的 Future 对象
-    requests_to_results = {}
-    unique_key = str(uuid4())
 
     crawler = PlaywrightCrawler(
         keep_alive=True,

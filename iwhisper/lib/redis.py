@@ -42,4 +42,11 @@ class RedisClient:
         await self._redis.close()
 
 
+# 全局实例
 redis_client: RedisClient | None = None
+
+
+def init_redis(url: str):
+    global redis_client
+    redis_client = RedisClient(url)
+    return redis_client
