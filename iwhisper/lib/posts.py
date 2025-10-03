@@ -243,4 +243,8 @@ async def extract_content_author_time(wrap: Locator) -> tuple[str, str, str]:
     except Exception:
         content = ""
 
+    content = content or ""
+    author = author or ""
+    time = time or ""
+
     return content, author, time
