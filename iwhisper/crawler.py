@@ -18,7 +18,7 @@ from fastapi import FastAPI
 from typing_extensions import override
 
 from iwhisper.lib.auth import create_session_fn
-from iwhisper.lib.redis_client import init_redis, redis_client
+from iwhisper.lib.redis_client import get_redis_client, init_redis
 from iwhisper.lib.utils import get_env
 
 from .routes import router
@@ -52,9 +52,9 @@ class CamoufoxPlugin(PlaywrightBrowserPlugin):
 
 @asynccontextmanager
 async def lifespan(app: FastAPI) -> AsyncIterator[State]:
-
     # 初始化redis
     init_redis(url=get_env("REDIS_URL", "redis://localhost"))
+    redis_client = get_redis_client()
     if not await redis_client.check_connection():
         raise ConnectionError("无法连接到 Redis，请检查 REDIS_URL 配置。")
 

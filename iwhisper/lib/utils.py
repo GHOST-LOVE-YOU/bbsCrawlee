@@ -6,7 +6,8 @@ from uuid import uuid4
 
 from crawlee import Request
 from crawlee.crawlers import PlaywrightCrawlingContext
-from redis_client import redis_client
+
+from iwhisper.lib.redis_client import get_redis_client
 
 
 async def enqueue_next_page(
@@ -70,10 +71,13 @@ async def page_dump(absolute_url: str) -> str:
     post_id = match.group(1)
 
     # 从 Redis 获取起始页
+    redis_client = get_redis_client()
     start_page = await redis_client.get_start_page(post_id)
 
     if start_page > 1:
         url = f"{absolute_url}?p={start_page}"
     else:
         url = absolute_url
+    return url
+    return url
     return url

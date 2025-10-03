@@ -63,10 +63,16 @@ class RedisClient:
 
 
 # 全局实例
-redis_client: RedisClient | None = None
+_redis_client: RedisClient | None = None
 
 
 def init_redis(url: str):
-    global redis_client
-    redis_client = RedisClient(url)
-    return redis_client
+    global _redis_client
+    _redis_client = RedisClient(url)
+    return _redis_client
+
+
+def get_redis_client() -> RedisClient:
+    if _redis_client is None:
+        raise RuntimeError("Redis 客户端未初始化，请先调用 init_redis()")
+    return _redis_client

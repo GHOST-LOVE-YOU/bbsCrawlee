@@ -5,8 +5,8 @@ from uuid import uuid4
 from crawlee import Request
 from crawlee.crawlers import PlaywrightCrawlingContext
 from playwright.sync_api import Locator
-from redis_client import redis_client
 
+from iwhisper.lib.redis_client import get_redis_client
 from iwhisper.lib.time import is_near_now
 from iwhisper.lib.utils import page_dump
 
@@ -122,6 +122,7 @@ async def extract_post_content(context: PlaywrightCrawlingContext) -> dict:
             post_author = author
             post_time = time
 
+    redis_client = get_redis_client()
     await redis_client.update_last_page(byr_id, page_no)
 
     result = {
