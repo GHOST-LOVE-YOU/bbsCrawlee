@@ -18,11 +18,11 @@ RUN echo "Python version:" \
     # Check if playwright is already installed
     && PLAYWRIGHT_INSTALLED=$(pip freeze | grep -q playwright && echo "true" || echo "false") \
     && if [ "$PLAYWRIGHT_INSTALLED" = "true" ]; then \
-        echo "Playwright already installed, excluding from uv sync" \
-        && uv sync --frozen --no-install-project --no-editable -q --no-dev --inexact --no-install-package playwright; \
+    echo "Playwright already installed, excluding from uv sync" \
+    && uv sync --frozen --no-install-project --no-editable -q --no-dev --inexact --no-install-package playwright; \
     else \
-        echo "Playwright not found, installing all dependencies" \
-        && uv sync --frozen --no-install-project --no-editable -q --no-dev --inexact; \
+    echo "Playwright not found, installing all dependencies" \
+    && uv sync --frozen --no-install-project --no-editable -q --no-dev --inexact; \
     fi \
     && echo "All installed Python packages:" \
     && pip freeze

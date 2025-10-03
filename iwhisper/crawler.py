@@ -20,6 +20,7 @@ from fastapi import FastAPI
 from typing_extensions import override
 
 from iwhisper.lib.auth import create_session_fn
+from iwhisper.lib.redis import RedisClient
 from iwhisper.lib.utils import get_env
 
 from .routes import router
@@ -53,8 +54,14 @@ class CamoufoxPlugin(PlaywrightBrowserPlugin):
 
 @asynccontextmanager
 async def lifespan(app: FastAPI) -> AsyncIterator[State]:
-    # 初始化爬虫
+    # 加载虚拟环境
     load_dotenv()
+
+    # 初始化redis
+    global redis_client
+    redis_client = RedisClient(url=get_env("REDIS_URL", "redis://localhost"))
+    if not await redis_client.check_connection():
+        raise ConnectionError("无法连接到 Redis，请检查 REDIS_URL 配置。")
 
     # 请求的唯一标识符映射到其结果的 Future 对象
     requests_to_results = {}
@@ -75,11 +82,6 @@ async def lifespan(app: FastAPI) -> AsyncIterator[State]:
         ),
     )
 
-    # await crawler._request_manager.is_finished()
-    # Expose the results store to request handlers
-    setattr(crawler, "requests_to_results", requests_to_results)
-    setattr(crawler, "unique_key", unique_key)
-
     # 如果会话被阻塞，则停止爬虫
     @crawler.error_handler
     async def error_processing(
@@ -93,14 +95,13 @@ async def lifespan(app: FastAPI) -> AsyncIterator[State]:
     crawler.log.info(f"开始{app.title} 的爬虫")
     run_task = asyncio.create_task(crawler.run([]))
 
-    # Make the crawler and the result dictionary available in the app state
-    yield {
-        "crawler": crawler,
-        "requests_to_results": requests_to_results,
-        "unique_key": unique_key,
-    }
+    # 使用中间件将状态传递给每个请求
+    yield {"crawler": crawler}
 
-    # Cleanup code that runs once when the app shuts down
+    # 关闭爬虫
     crawler.stop()
-    # Wait for the crawler to finish
     await run_task
+
+    # 关闭redis连接
+    if redis_client:
+        await redis_client.close()

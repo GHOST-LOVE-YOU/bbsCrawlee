@@ -17,5 +17,6 @@ dependencies = [
     "pytz>=2025.2",
     "fastapi[standard]>=0.118.0",
     "parsel>=1.10.0",
+    "redis>=6.4.0",
 ]
 
