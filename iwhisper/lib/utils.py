@@ -79,5 +79,3 @@ async def page_dump(absolute_url: str) -> str:
     else:
         url = absolute_url
     return url
-    return url
-    return url
