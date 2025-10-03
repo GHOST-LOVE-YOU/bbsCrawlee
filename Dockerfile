@@ -1,17 +1,20 @@
-# First, specify the base Docker image.
-# You can see the Docker images from Apify at https://hub.docker.com/r/apify/.
-# You can also use any other image from Docker Hub.
-# Currently camoufox has issues installing on Python 3.13
+# 使用 Apify Playwright Python 镜像 (Python 3.12)
 FROM apify/actor-python-playwright:3.12
+
+# 安装 git（某些包可能需要）
 RUN apt update && apt install -yq git && rm -rf /var/lib/apt/lists/*
 
+# 升级 pip & 安装 uv
 RUN pip install -U pip setuptools \
     && pip install 'uv<1'
 
+# 设置 uv 项目环境
 ENV UV_PROJECT_ENVIRONMENT="/usr/local"
 
+# 先拷贝依赖文件，加快构建
 COPY pyproject.toml uv.lock ./
 
+# 安装依赖
 RUN echo "Python version:" \
     && python --version \
     && echo "Installing dependencies:" \
@@ -26,15 +29,15 @@ RUN echo "Python version:" \
     fi \
     && echo "All installed Python packages:" \
     && pip freeze
-# Next, copy the remaining files and directories with the source code.
-# Since we do this after installing the dependencies, quick build will be really fast
-# for most source file changes.
+
+# 再拷贝源代码
 COPY . ./
 
-# Use compileall to ensure the runnability of the Actor Python code.
+# 预编译检查
 RUN python -m compileall -q .
 
-# Fetch camoufox files that are always needed when using camoufox.
+# camoufox 浏览器依赖
 RUN python -m camoufox fetch
-# Specify how to launch the source code of your Actor.
-CMD ["python", "-m", "iwhisper"]
+
+# 默认命令：用 uv 启动 FastAPI 开发服务器
+CMD ["uv", "run", "fastapi", "dev", "iwhisper/server.py"]
