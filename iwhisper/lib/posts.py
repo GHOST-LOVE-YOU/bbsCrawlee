@@ -1,6 +1,6 @@
-import json
 import re
 from urllib.parse import parse_qs, urlparse
+from uuid import uuid4
 
 from crawlee import Request
 from crawlee.crawlers import PlaywrightCrawlingContext
@@ -52,7 +52,9 @@ async def addPostsToQueue(context: PlaywrightCrawlingContext) -> bool:
 
         if is_near_now(latest_text):
             absolute_url = f"https://bbs.byr.cn{href}"
-            req = Request.from_url(absolute_url, label="detail")
+            req = Request.from_url(
+                absolute_url, label="detail", unique_key=f"{absolute_url}-{uuid4()}"
+            )
             await context.add_requests([req])
         else:
             context.log.info(f"post: href={href} latest={latest_text} is not near now")
@@ -101,7 +103,6 @@ async def extract_post_content(context: PlaywrightCrawlingContext) -> dict:
         # 内容块（排除精彩回复块）
         content, author, time = await extract_content_author_time(wrap)
 
-
         # 记录评论
         comments.append(
             {
@@ -144,6 +145,7 @@ async def extract_topic(wrap: Locator) -> str:
 
     return topic_text
 
+
 async def extract_floor_text(wrap: Locator) -> str:
     floor_text = ""
     try:
@@ -154,6 +156,7 @@ async def extract_floor_text(wrap: Locator) -> str:
         floor_text = ""
 
     return floor_text
+
 
 async def extract_like_dislike(wrap: Locator) -> tuple[int, int]:
     like_val = -1

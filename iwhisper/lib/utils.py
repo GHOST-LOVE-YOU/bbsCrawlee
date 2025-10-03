@@ -1,6 +1,7 @@
 # 将下一页链接加入队列
 import os
 from urllib.parse import urljoin
+from uuid import uuid4
 
 from crawlee import Request
 from crawlee.crawlers import PlaywrightCrawlingContext
@@ -20,7 +21,9 @@ async def enqueue_next_page(
             if next_href:
                 next_url = urljoin(context.request.url, next_href)
                 context.log.info(f"添加下一页链接: {next_url}, label: {label}")
-                req = Request.from_url(next_url, label=label)
+                req = Request.from_url(
+                    next_url, label=label, unique_key=f"{next_url}-{uuid4()}"
+                )
                 await context.add_requests([req])
         else:
             context.log.debug("没有下一页链接; 可能已到最后一页")
