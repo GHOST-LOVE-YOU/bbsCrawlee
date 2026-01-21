@@ -53,7 +53,10 @@ def index() -> str:
 
 @app.get("/scrape")
 async def scrape_url(
-    request: Request, url: str | None = None, user: str = Depends(check_credentials)
+    request: Request,
+    url: str | None = None,
+    time_threshold: int | None = None,
+    _user: str = Depends(check_credentials),
 ) -> dict:
     # 防止并发运行
     global is_crawling
@@ -66,9 +69,14 @@ async def scrape_url(
         if not url:
             return {"url": "missing", "scrape result": "no results"}
 
+        # 准备 user_data,如果指定了 time_threshold 则包含它
+        user_data = {}
+        if time_threshold is not None:
+            user_data["threshold"] = time_threshold
+
         # 将请求加入爬虫队列
         await request.state.crawler.add_requests(
-            [crawlee.Request.from_url(url, unique_key=str(uuid4()))]
+            [crawlee.Request.from_url(url, unique_key=str(uuid4()), user_data=user_data)]
         )
 
         # 等待爬虫处理完成
@@ -81,5 +89,31 @@ async def scrape_url(
     finally:
         async with lock:
             is_crawling = False
-            is_crawling = False
-            is_crawling = False
+
+
+@app.post("/scrape/post")
+async def scrape_post(
+    request: Request, url: str | None = None, _user: str = Depends(check_credentials)
+) -> dict:
+    """
+    爬取单个帖子的所有分页内容
+    接受POST请求,参数为帖子的URL
+    不使用全局锁,不使用Redis检测是否爬过
+    """
+    if not url:
+        return {"error": "url参数缺失"}
+
+    # 将请求加入爬虫队列,使用detail标签直接进入帖子详情处理
+    await request.state.crawler.add_requests(
+        [crawlee.Request.from_url(url, label="detail", unique_key=str(uuid4()))]
+    )
+
+    # 等待爬虫处理完成
+    while not await request.state.crawler._request_manager.is_finished():
+        await asyncio.sleep(0.5)
+
+    # 返回结果
+    result = await request.state.crawler.get_data()
+    return {"items": result.items}
+
+

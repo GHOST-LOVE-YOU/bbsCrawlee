@@ -24,6 +24,9 @@ async def addPostsToQueue(context: PlaywrightCrawlingContext) -> bool:
     if page is None:
         return False
 
+    # 从上下文中获取 threshold,如果没有则使用 None(会从环境变量读取)
+    threshold = context.request.user_data.get("threshold")
+
     # 提取非置顶（不含 .top）行的主题链接与最新回复时间（Python locator API）
     row_locator = page.locator(".board-list tbody tr:not(.top)")
     rows_count = await row_locator.count()
@@ -52,7 +55,7 @@ async def addPostsToQueue(context: PlaywrightCrawlingContext) -> bool:
                 else:
                     latest_text = (await second_cell.text_content() or "").strip()
 
-        if is_near_now(latest_text):
+        if is_near_now(latest_text, threshold):
             absolute_url = await page_dump(f"https://bbs.byr.cn{href}")
             req = Request.from_url(
                 absolute_url, label="detail", unique_key=f"{absolute_url}-{uuid4()}"
